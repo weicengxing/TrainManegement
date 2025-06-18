@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT</title>
+    <style>
+        :root {
+            --bg-primary: #343541;
+            --bg-secondary: #202123;
+            --bg-tertiary: #444654;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8ea0;
+            --accent-color: #10a37f;
+            --border-color: #4d4d4f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .new-chat-btn {
+            margin: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: transparent;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .new-chat-btn:hover {
+            background-color: #2a2b32;
+        }
+        
+        .new-chat-btn svg {
+            margin-right: 12px;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .history-item:hover {
+            background-color: #2a2b32;
+        }
+        
+        .history-item svg {
+            margin-right: 12px;
+            min-width: 16px;
+        }
+        
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .account {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .account:hover {
+            background-color: #2a2b32;
+        }
+        
+        .account-name {
+            margin-left: 12px;
+            font-size: 14px;
+        }
+        
+        /* Main Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 100%;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            padding: 20px 0;
+            display: flex;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 2px;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .user-message .avatar {
+            background-color: #5436DA;
+        }
+        
+        .assistant-message .avatar {
+            background-color: #10a37f;
+        }
+        
+        .message-content {
+            flex: 1;
+            min-width: 0;
+            line-height: 1.5;
+        }
+        
+        .assistant-message {
+            background-color: var(--bg-tertiary);
+        }
+        
+        /* Input Area */
+        .input-container {
+            padding: 24px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .input-box {
+            position: relative;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            resize: none;
+            height: 24px;
+            max-height: 200px;
+            padding: 12px 45px 12px 16px;
+            font-size: 16px;
+            line-height: 1.5;
+            outline: none;
+        }
+        
+        .send-button {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .send-button:hover {
+            background-color: #0d8a6a;
+        }
+        
+        .send-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Footer */
+        .footer {
+            padding: 12px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+                position: absolute;
+                z-index: 100;
+                transition: width 0.3s;
+            }
+            
+            .sidebar.active {
+                width: 260px;
+            }
+            
+            .menu-toggle {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 101;
+                background: var(--bg-secondary);
+                border-radius: 4px;
+                padding: 8px;
+                cursor: pointer;
+                display: block;
+            }
+        }
+        
+        .menu-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <button class="new-chat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4v16m8-8H4"/>
+            </svg>
+            New chat
+        </button>
+        <div class="history">
+            <div class="history-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
+                    <path d="M13 10h-2V7h-1v3H7v1h3v3h1v-3h3v-1z"/>
+                </svg>
+                <span>What is React?</span>
+            </div>
+            <div class="history-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
+                    <path d="M13 10h-2V7h-1v3H7v1h3v3h1v-3h3v-1z"/>
+                </svg>
+                <span>Explain quantum computing</span>
+            </div>
+            <div class="history-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
+                    <path d="M13 10h-2V7h-1v3H7v1h3v3h1v-3h3v-1z"/>
+                </svg>
+                <span>How to make a website?</span>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="account">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M20 19v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6z"/>
+                </svg>
+                <span class="account-name">John Doe</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Chat Area -->
+    <div class="chat-container">
+        <div class="chat-messages">
+            <div class="message user-message">
+                <div class="avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M20 19v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6z"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    Hello, how are you today?
+                </div>
+            </div>
+            
+            <div class="message assistant-message">
+                <div class="avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 12H5v-2h6v2zm8-4H5v-2h14v2zm0-4H5V6h14v2z"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    Hello! I'm just a computer program, so I don't have feelings, but I'm here and ready to help you. How can I assist you today?
+                </div>
+            </div>
+            
+            <div class="message user-message">
+                <div class="avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M20 19v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6z"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    Can you explain how neural networks work?
+                </div>
+            </div>
+            
+            <div class="message assistant-message">
+                <div class="avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 12H5v-2h6v2zm8-4H5v-2h14v2zm0-4H5V6h14v2z"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    Certainly! Neural networks are computing systems inspired by the human brain. They consist of interconnected nodes (neurons) organized in layers:
+                    
+                    1. <strong>Input Layer</strong>: Receives the initial data
+                    2. <strong>Hidden Layers</strong>: Process data through weighted connections
+                    3. <strong>Output Layer</strong>: Produces the final result
+                    
+                    Each connection has a weight that adjusts during training. The network learns by adjusting these weights to minimize the difference between its predictions and actual outcomes through a process called backpropagation.
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-box">
+                <textarea placeholder="Message ChatGPT..." rows="1"></textarea>
+                <button class="send-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            ChatGPT can make mistakes. Consider checking important information.
+        </div>
+    </div>
+    
+    <div class="menu-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff" width="24" height="24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+    </div>
+
+    <script>
+        // Textarea auto-resize
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Send message functionality
+        const sendButton = document.querySelector('.send-button');
+        sendButton.addEventListener('click', sendMessage);
+        
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const message = textarea.value.trim();
+            if (message) {
+                // Add user message
+                const messagesContainer = document.querySelector('.chat-messages');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.innerHTML = `
+                    <div class="avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M20 19v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6z"/>
+                        </svg>
+                    </div>
+                    <div class="message-content">${message}</div>
+                `;
+                messagesContainer.appendChild(userMessage);
+                
+                // Clear input
+                textarea.value = '';
+                textarea.style.height = '24px';
+                
+                // Add thinking indicator
+                const thinkingMessage = document.createElement('div');
+                thinkingMessage.className = 'message assistant-message';
+                thinkingMessage.innerHTML = `
+                    <div class="avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 12H5v-2h6v2zm8-4H5v-2h14v2zm0-4H5V6h14v2z"/>
+                        </svg>
+                    </div>
+                    <div class="message-content">Thinking...</div>
+                `;
+                messagesContainer.appendChild(thinkingMessage);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Simulate AI response after delay
+                setTimeout(() => {
+                    thinkingMessage.querySelector('.message-content').textContent = 
+                        "I'm an AI assistant based on the ChatGPT model. In a real implementation, I would provide a thoughtful response to your message: '" + 
+                        message + "'. This is a frontend demonstration of the ChatGPT interface.";
+                }, 1500);
+            }
+        }
+        
+        // Menu toggle for mobile
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    </script>
+</body>
+</html> 

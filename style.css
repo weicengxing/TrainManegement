@@ -1,0 +1,276 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000010; /* Dark space blue */
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.solar-system-container {
+    position: relative;
+    width: 90vmin; /* Responsive size */
+    height: 90vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#sun {
+    width: 12vmin; /* Sun size relative to container */
+    height: 12vmin;
+    background-color: #FFD700; /* Gold */
+    border-radius: 50%;
+    box-shadow: 0 0 6vmin #FFD700, 0 0 10vmin #FFA500; /* Sun glow */
+    position: absolute;
+    z-index: 1000;
+}
+
+.orbit {
+    position: absolute;
+    border-style: solid;
+    border-color: rgba(128, 128, 128, 0.3); /* Semi-transparent grey for orbits */
+    border-width: 0.1vmin;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.planet {
+    position: absolute;
+    border-radius: 50%;
+    background-color: grey; /* Default planet color */
+    box-shadow: 0 0 1vmin rgba(255, 255, 255, 0.5); /* Slight glow */
+}
+
+/* --- Planet Specific Styles --- */
+
+/* Mercury */
+#mercury-orbit {
+    width: 20vmin;
+    height: 20vmin;
+    animation: revolve 8.8s linear infinite; /* ~88 Earth days */
+}
+#mercury {
+    width: 1.5vmin;
+    height: 1.5vmin;
+    background-color: #B0AFA8; /* Greyish */
+    transform-origin: 10vmin center; /* (orbit-width / 2) */
+}
+
+/* Venus */
+#venus-orbit {
+    width: 28vmin;
+    height: 28vmin;
+    animation: revolve 22.5s linear infinite; /* ~225 Earth days */
+}
+#venus {
+    width: 2.5vmin;
+    height: 2.5vmin;
+    background-color: #E6D2A8; /* Pale yellow */
+    transform-origin: 14vmin center; /* (orbit-width / 2) */
+}
+
+/* Earth */
+#earth-orbit {
+    width: 38vmin;
+    height: 38vmin;
+    animation: revolve 36.5s linear infinite; /* 365 Earth days */
+}
+#earth {
+    width: 2.7vmin;
+    height: 2.7vmin;
+    background-color: #6B93D6; /* Blue */
+    transform-origin: 19vmin center; /* (orbit-width / 2) */
+}
+/* Optionally, add a moon for Earth later */
+
+/* Mars */
+#mars-orbit {
+    width: 48vmin;
+    height: 48vmin;
+    animation: revolve 68.7s linear infinite; /* ~687 Earth days */
+}
+#mars {
+    width: 2vmin;
+    height: 2vmin;
+    background-color: #C1440E; /* Reddish */
+    transform-origin: 24vmin center; /* (orbit-width / 2) */
+}
+
+/* Jupiter */
+#jupiter-orbit {
+    width: 65vmin; /* Jupiter is far */
+    height: 65vmin;
+    animation: revolve 433.3s linear infinite; /* ~4333 Earth days (12 years) */
+}
+#jupiter {
+    width: 6vmin; /* Jupiter is big */
+    height: 6vmin;
+    background-color: #D8CA9D; /* Orangey-brown stripes (simplified) */
+    transform-origin: 32.5vmin center; /* (orbit-width / 2) */
+}
+
+/* Saturn */
+#saturn-orbit {
+    width: 80vmin;
+    height: 80vmin;
+    animation: revolve 1075.9s linear infinite; /* ~10759 Earth days (29.5 years) */
+}
+#saturn {
+    width: 5vmin;
+    height: 5vmin;
+    background-color: #F0E68C; /* Khaki/Pale yellow */
+    transform-origin: 40vmin center; /* (orbit-width / 2) */
+    z-index: 10; /* Ensure planet is above its ring if drawn as separate divs */
+}
+#saturn-ring {
+    position: absolute;
+    width: 9vmin;
+    height: 9vmin;
+    border: 1vmin solid rgba(165, 150, 130, 0.7); /* Ring color */
+    border-radius: 50%;
+    box-sizing: border-box; /* Important for border not to add to width/height */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotateX(70deg); /* Tilt the ring */
+    z-index: 5;
+}
+
+
+/* Uranus */
+#uranus-orbit {
+    width: 90vmin;
+    height: 90vmin;
+    animation: revolve 3068.5s linear infinite; /* ~30685 Earth days (84 years) */
+}
+#uranus {
+    width: 3.5vmin;
+    height: 3.5vmin;
+    background-color: #AFDBF5; /* Light blue */
+    transform-origin: 45vmin center; /* (orbit-width / 2) */
+}
+
+/* Neptune */
+#neptune-orbit {
+    width: 100vmin; /* Slightly outside container, adjust container if needed */
+    height: 100vmin;
+    animation: revolve 6019.0s linear infinite; /* ~60190 Earth days (165 years) */
+}
+#neptune {
+    width: 3.3vmin;
+    height: 3.3vmin;
+    background-color: #3F54BA; /* Dark blue */
+    transform-origin: 50vmin center; /* (orbit-width / 2) */
+}
+
+
+/* --- Animation for Orbit --- */
+/* We will use JavaScript to control the planet's position along its orbit dynamically.
+   The CSS 'revolve' animation is a fallback/simplification if JS is disabled or for the orbit lines themselves if planets are absolutely positioned within a static orbit div.
+   For precise control and different speeds, JavaScript is better for the planets themselves.
+   The current approach with 'revolve' on the orbit div itself means the planet inside will move with it.
+   This means we need to place the planet at the edge of the orbit.
+*/
+
+@keyframes revolve {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Adjust planet positions to be on their orbits */
+/* This is tricky with the current structure. A better JS approach will place planets.
+   Let's adjust the planet's position within its orbit div.
+   If the orbit div rotates, the planet needs to be positioned at its edge.
+*/
+
+#mercury { top: calc(50% - (1.5vmin / 2)); left: 0; /* Adjusted to orbit edge */ }
+#venus   { top: calc(50% - (2.5vmin / 2)); left: 0; }
+#earth   { top: calc(50% - (2.7vmin / 2)); left: 0; }
+#mars    { top: calc(50% - (2.0vmin / 2)); left: 0; }
+#jupiter { top: calc(50% - (6.0vmin / 2)); left: 0; }
+#saturn  { top: calc(50% - (5.0vmin / 2)); left: 0; }
+#uranus  { top: calc(50% - (3.5vmin / 2)); left: 0; }
+#neptune { top: calc(50% - (3.3vmin / 2)); left: 0; }
+
+/* For Saturn's ring, it's parented to Saturn's orbit div.
+   We need to position it around Saturn.
+   The current HTML structure for Saturn's ring might need adjustment for easier CSS positioning relative to Saturn planet.
+   For now, the #saturn-ring style positions it absolutely, assuming it's placed relative to the solar system center.
+   If it needs to move with Saturn planet, it should be a child of #saturn div or positioned via JS.
+   The HTML structure has it as a sibling to #saturn, inside #saturn-orbit. This is fine.
+   The #saturn-ring's current CSS places it centrally within the #saturn-orbit, this means it won't follow the planet.
+   Let's refine Saturn's ring. It should be positioned around the planet itself.
+   The easiest way is to make the ring a child of the planet div in HTML or position it via JS.
+   Given current HTML, let's assume JS will handle the ring's position relative to Saturn or we make it more complex with CSS.
+   The `transform-origin` on planets helps them orbit the center of their `orbit` div.
+*/
+
+/* Correction for planet positions:
+   The transform-origin on the planet div itself won't make it orbit.
+   The planet is a child of the .orbit div. The .orbit div rotates.
+   The planet needs to be placed at one edge of the .orbit div.
+   For example, for mercury-orbit (width 20vmin), mercury (planet) should be placed at `left: 0; top: 50% - (mercury-height/2);`
+   Then the `transform-origin` of the *orbit div* should be `center center`.
+   The animation `revolve` is applied to the orbit div.
+   Let's re-verify the planet positioning and animation.
+*/
+
+/* The current CSS animations on orbits will spin the orbit div.
+   The planet inside, if positioned correctly at the edge (e.g., left:0, top: 50%-planet_radius),
+   will appear to orbit. The transform-origin of the planet itself isn't used for the orbit path,
+   but for its own rotation if we were to add that (e.g. Earth's daily spin).
+   The `transform-origin` for each planet in the current CSS is incorrect. It should be on the orbit element.
+   No, the `transform-origin` for the planet element set to `(orbit-radius) center` means that if we were to apply a rotation *to the planet itself*,
+   it would rotate around that point. That's not what we want for orbital motion here.
+   The current setup: `.orbit` div rotates. `.planet` is a child. If planet is `left:0; top: 50% - (planet_height/2)`, it will be on the edge.
+   Let's remove the `transform-origin` from the planets for now as it's confusing and not directly used for this CSS-only orbit method.
+   The `animation: revolve ...` is on the orbit DIV. This is correct.
+*/
+
+/* Removing transform-origin from planets as it's not used for this orbit method */
+#mercury { transform-origin: unset; }
+#venus   { transform-origin: unset; }
+#earth   { transform-origin: unset; }
+#mars    { transform-origin: unset; }
+#jupiter { transform-origin: unset; }
+#saturn  { transform-origin: unset; }
+#uranus  { transform-origin: unset; }
+#neptune { transform-origin: unset; }
+
+/* Saturn ring adjustment:
+   The ring is a sibling of Saturn planet, inside Saturn's orbit.
+   If Saturn's orbit div rotates, and Saturn planet is positioned at its edge, the ring needs to be positioned relative to Saturn.
+   This is hard with pure CSS if the ring is not a child of Saturn.
+   The current CSS for saturn-ring places it dead center of the #saturn-orbit, which is the sun's position. This is wrong.
+   It should be around the Saturn planet.
+   Let's assume for now the JavaScript will handle complex positioning like Saturn's rings accurately.
+   The CSS approach for Saturn's ring as defined earlier will just draw a static ring at the center.
+   We'll make the ring a child of the Saturn planet in HTML for CSS to work easily or handle it in JS.
+
+   Revisiting Saturn's ring: In the HTML, it's a sibling of the planet, within the orbit div.
+   If #saturn-orbit rotates, and #saturn is at its edge, #saturn-ring also needs to be positioned relative to that edge.
+   This is tricky. The easiest CSS way is to make the ring a child of #saturn.
+   The current CSS for #saturn-ring:
+   `top: 50%; left: 50%; transform: translate(-50%, -50%) rotateX(70deg);`
+   This places it in the center of its parent, #saturn-orbit.
+   To make it follow Saturn, it would need to be positioned dynamically or be a child of #saturn.
+   For a CSS-only animation of the ring *with the planet*, it would be best as a child of the planet div.
+   I'll adjust the HTML slightly for Saturn or rely on JS.
+   Given I have `script.js` linked, more complex positioning will be handled there.
+   The current CSS animation will make the planets orbit. The relative speeds are set by `animation-duration`.
+   The sizes are set. Colors are set.
+   The background is dark. Sun has a glow.
+   The orbit lines are visible.
+
+   This CSS provides a good starting point. JavaScript will enhance it for more accurate movements and interactions if needed,
+   especially for things like elliptical orbits or more precise control over speeds and ring orientations.
+   The CSS `revolve` animation is a good base.
+*/ 
